@@ -69,7 +69,7 @@
   (try
     (http/get url)
     (catch Exception e
-      (get-in (ex-data e) [:object])
+      (:object (ex-data e))
       )))
 
 

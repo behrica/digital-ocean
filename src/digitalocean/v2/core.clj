@@ -3,8 +3,8 @@
   (:refer-clojure :exclude [keys])
   (:require [cheshire.core :as json]
 	    [schema.core :as scm]
-            [clojure.java.io :as io]
-	    [org.httpkit.client :as http]))
+      [clojure.java.io :as io]
+      [clj-http.lite.client :as http]))
 
 ;; _____ _____ _____ _____ _______       _         ____   _____ ______          _   _
 ;; |  __ \_   _/ ____|_   _|__   __|/\   | |       / __ \ / ____|  ____|   /\   | \ | |
@@ -26,6 +26,16 @@
 
 ;; **************************************************************
 
+(defn request-or-error [request-map]
+(try
+  (http/request request-map)
+  (catch Exception e
+    (if (ex-data e)
+      (:object (ex-data e))
+      {:ex-message (.getMessage e)}))))
+
+
+
 (defn run-request
   "Utility method for making HTTP requests
    to the Digital Ocean API"
@@ -36,15 +46,15 @@
         mergeable (if (empty? all-params)
                     (hash-map)
                     {:body (json/encode all-params)})
-        {:keys [status headers body error] :as resp}
-          @(http/request
-            (merge
-              {:method method
-               :url url
-               :headers headers} mergeable))]
-  (if (nil? error)
-    (json/parse-string body true)
-    {:error error})))
+        {:keys [status body ex-message] :as resp}
+        (request-or-error
+          (merge
+            {:method method
+             :url url
+             :headers headers} mergeable))]
+    (cond  ex-message     {:error {:message ex-message}}
+           (> status 400)  {:error (json/parse-string body true)}
+           true            (json/parse-string body true))))
 
 (defn normalize-url [url]
   (if (string? url)

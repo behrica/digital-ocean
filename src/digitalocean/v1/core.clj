@@ -3,7 +3,8 @@
     :author "Owain Lewis"}
   (:require [cheshire.core :as json]
 	    [schema.core :as scm]
-	    [org.httpkit.client :as http]))
+      [clj-http.lite.client :as http]
+      ))
 
 (defonce digital-ocean "https://api.digitalocean.com")
 
@@ -63,25 +64,29 @@
 ;; HTTP request
 ;; **************************************************************
 
+
+(defn get-or-error [url]
+  (try
+    (http/get url)
+    (catch Exception e
+      (get-in (ex-data e) [:object])
+      )))
+
+
 (defn request
   "Make a simple request. We are only dealing with GET requests
    for this particular API"
   [endpoint client-id api-key & params]
   (let [url (url-with-params endpoint client-id api-key (into {} params))
-	{:keys [status headers body error] :as resp} @(http/get url)]
-    (if error
-      {:error error}
-      (json/parse-string body true))))
+	      {:keys [status headers body error] :as resp} (get-or-error url)]
+        (println url)
+        (println body)
+        (if (= "ERROR" (:status body))
+          body
+        (json/parse-string body true))))
+
 ;; **************************************************************
 
-(defmacro ->>>
-  "Safe thread macro
-   Returns err message if there is an error
-   else applies arrow threading to the response"
-  [response & forms]
-  `(if-not (contains? ~response :error)
-     (->> ~response ~@forms)
-     ~response))
 
 (defn get-for
   "Helper function/abstraction to reduce duplication"
@@ -90,7 +95,7 @@
         resp (request resource client-id api-key)]
     (if (= (:status resp) "ERROR")
      resp
-    (->>> resp k)))))
+    (k resp )))))
 
 (defn enforce-params
   "Helper which throws assertion error if required params are

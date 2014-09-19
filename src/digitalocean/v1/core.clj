@@ -78,7 +78,7 @@
    for this particular API"
   [endpoint client-id api-key & params]
   (let [url (url-with-params endpoint client-id api-key (into {} params))
-	      {:keys [status headers body error] :as resp} (get-or-error url)]
+	      {:keys [body] :as resp} (get-or-error url)]
         (println url)
         (println body)
         (if (= "ERROR" (:status body))

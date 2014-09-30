@@ -1,4 +1,4 @@
-(defproject digitalocean "1.2"
+(defproject digitalocean "1.2-behrica-SNAPSHOT"
   :description "Clojure Digital Ocean Client"
   :url "http://owainlewis.com"
   :license {:name "Eclipse Public License"

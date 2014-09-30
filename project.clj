@@ -1,7 +1,7 @@
-(defproject digitalocean "1.2-behrica-SNAPSHOT"
-  :description "Clojure Digital Ocean Client"
-  :url "http://owainlewis.com"
-  :license {:name "Eclipse Public License"
+(defproject org.clojar.behrica/digitalocean "1.3-SNAPSHOT"
+            :description "Clojure Digital Ocean Client"
+            :url "http://owainlewis.com"
+            :license {:name "Eclipse Public License"
 	    :url "http://www.eclipse.org/legal/epl-v10.html"}
   :plugins [[lein-midje "3.1.3"]]
   :dependencies [[org.clojure/clojure "1.5.1"]
